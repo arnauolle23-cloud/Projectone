@@ -37,6 +37,10 @@ func _physics_process(delta: float) -> void:
 		"mover_adelante", "mover_atras"
 	)
 
+	# Debug: si ves valores distintos de (0,0) al pulsar WASD, el input funciona.
+	if entrada != Vector2.ZERO:
+		print("Input detectado: ", entrada)
+
 	# Convertimos el Vector2 de entrada a dirección 3D.
 	var direccion: Vector3 = Vector3(entrada.x, 0.0, entrada.y)
 
@@ -71,10 +75,12 @@ func _configurar_inputs() -> void:
 
 
 func _agregar_accion(nombre: String, tecla: Key) -> void:
+	# Borrar si ya existe para asegurar que tenga la tecla correcta.
 	if InputMap.has_action(nombre):
-		return  # Ya existe, no duplicar.
+		InputMap.erase_action(nombre)
 	InputMap.add_action(nombre)
 	var evento := InputEventKey.new()
+	evento.keycode = tecla
 	evento.physical_keycode = tecla
 	InputMap.action_add_event(nombre, evento)
 
