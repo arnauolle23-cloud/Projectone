@@ -288,17 +288,12 @@ func _crear_escena_prueba() -> void:
 	luz.light_energy = 1.2
 	padre.add_child(luz)
 
-	# --- Cielo y ambiente ---
-	var env := WorldEnvironment.new()
-	env.name = "Ambiente"
-	var environment := Environment.new()
-	environment.background_mode = Environment.BG_COLOR
-	environment.background_color = Color(0.45, 0.7, 0.95)
-	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environment.ambient_light_color = Color(0.55, 0.55, 0.6)
-	environment.ambient_light_energy = 0.5
-	env.environment = environment
-	padre.add_child(env)
+	# --- Luz ambiente extra para que no quede oscuro ---
+	var luz2 := DirectionalLight3D.new()
+	luz2.rotation.x = deg_to_rad(-30.0)
+	luz2.rotation.y = deg_to_rad(120.0)
+	luz2.light_energy = 0.4
+	padre.add_child(luz2)
 
 
 func _crear_arbol(padre: Node, pos: Vector3) -> void:
