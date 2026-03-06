@@ -18,6 +18,7 @@ var _tiempo_anim: float = 0.0
 
 
 func _ready() -> void:
+	print("=== PLAYER v3 - MAPA CON CASA Y ARBOLES ===")
 	_crear_personaje()
 	_crear_escena_prueba()
 
