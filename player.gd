@@ -297,7 +297,6 @@ func _crear_escena_prueba() -> void:
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color(0.55, 0.55, 0.6)
 	environment.ambient_light_energy = 0.5
-	environment.tonemap_mode = Environment.TONE_MAP_ACES
 	env.environment = environment
 	padre.add_child(env)
 
