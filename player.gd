@@ -75,7 +75,7 @@ func _agregar_accion(nombre: String, tecla: Key) -> void:
 		return  # Ya existe, no duplicar.
 	InputMap.add_action(nombre)
 	var evento := InputEventKey.new()
-	evento.keycode = tecla
+	evento.physical_keycode = tecla
 	InputMap.action_add_event(nombre, evento)
 
 
