@@ -67,8 +67,22 @@ func _animar(delta: float, en_movimiento: bool) -> void:
 	if _pivot_pierna_izq == null:
 		return
 
-	if en_movimiento:
-		# Ciclo de caminar: balancear piernas y brazos con seno
+	if not is_on_floor():
+		# --- Animación de salto ---
+		if velocity.y > 0:
+			# Subiendo: piernas recogidas, brazos arriba
+			_pivot_pierna_izq.rotation.x = lerpf(_pivot_pierna_izq.rotation.x, 0.5, 0.15)
+			_pivot_pierna_der.rotation.x = lerpf(_pivot_pierna_der.rotation.x, 0.5, 0.15)
+			_pivot_brazo_izq.rotation.x = lerpf(_pivot_brazo_izq.rotation.x, -2.0, 0.15)
+			_pivot_brazo_der.rotation.x = lerpf(_pivot_brazo_der.rotation.x, -2.0, 0.15)
+		else:
+			# Cayendo: piernas estiradas, brazos abiertos
+			_pivot_pierna_izq.rotation.x = lerpf(_pivot_pierna_izq.rotation.x, -0.3, 0.1)
+			_pivot_pierna_der.rotation.x = lerpf(_pivot_pierna_der.rotation.x, -0.3, 0.1)
+			_pivot_brazo_izq.rotation.x = lerpf(_pivot_brazo_izq.rotation.x, -1.2, 0.1)
+			_pivot_brazo_der.rotation.x = lerpf(_pivot_brazo_der.rotation.x, -1.2, 0.1)
+	elif en_movimiento:
+		# --- Animación de caminar ---
 		_tiempo_anim += delta * 10.0
 		var angulo := sin(_tiempo_anim) * 0.6
 
@@ -77,7 +91,7 @@ func _animar(delta: float, en_movimiento: bool) -> void:
 		_pivot_brazo_izq.rotation.x = -angulo * 0.8
 		_pivot_brazo_der.rotation.x = angulo * 0.8
 	else:
-		# Volver a posición neutral suavemente
+		# --- Volver a posición neutral ---
 		_tiempo_anim = 0.0
 		_pivot_pierna_izq.rotation.x = lerpf(_pivot_pierna_izq.rotation.x, 0.0, 0.2)
 		_pivot_pierna_der.rotation.x = lerpf(_pivot_pierna_der.rotation.x, 0.0, 0.2)
@@ -294,6 +308,15 @@ func _crear_escena_prueba() -> void:
 	luz2.rotation.y = deg_to_rad(120.0)
 	luz2.light_energy = 0.4
 	padre.add_child(luz2)
+
+	# --- Fondo cielo azul ---
+	var env := WorldEnvironment.new()
+	env.name = "Ambiente"
+	var environment := Environment.new()
+	environment.background_mode = Environment.BG_COLOR
+	environment.background_color = Color(0.45, 0.7, 0.95)
+	env.environment = environment
+	padre.add_child(env)
 
 
 func _crear_arbol(padre: Node, pos: Vector3) -> void:
