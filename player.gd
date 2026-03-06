@@ -246,24 +246,37 @@ func _crear_escena_prueba() -> void:
 	suelo.add_child(mesh_suelo)
 	padre.add_child(suelo)
 
-	# --- Camino de tierra ---
+	# --- Camino de tierra principal ---
+	var mat_camino := StandardMaterial3D.new()
+	mat_camino.albedo_color = Color(0.55, 0.4, 0.25)
 	var camino := MeshInstance3D.new()
 	var camino_m := BoxMesh.new()
 	camino_m.size = Vector3(3.0, 0.02, 40.0)
-	var mat_camino := StandardMaterial3D.new()
-	mat_camino.albedo_color = Color(0.55, 0.4, 0.25)
 	camino_m.material = mat_camino
 	camino.mesh = camino_m
 	camino.position.y = 0.11
 	padre.add_child(camino)
 
-	# --- Árboles ---
+	# Camino lateral (cruce)
+	var camino2 := MeshInstance3D.new()
+	var camino2_m := BoxMesh.new()
+	camino2_m.size = Vector3(40.0, 0.02, 3.0)
+	camino2_m.material = mat_camino
+	camino2.mesh = camino2_m
+	camino2.position.y = 0.11
+	padre.add_child(camino2)
+
+	# --- Casa (cerca del cruce) ---
+	_crear_casa(padre, Vector3(7.0, 0.0, -6.0))
+
+	# --- Árboles repartidos por el mapa ---
 	var posiciones_arboles := [
 		Vector3(-6.0, 0.0, -5.0), Vector3(-8.0, 0.0, 3.0),
-		Vector3(7.0, 0.0, -8.0), Vector3(5.0, 0.0, 6.0),
-		Vector3(-4.0, 0.0, -12.0), Vector3(9.0, 0.0, -3.0),
-		Vector3(-10.0, 0.0, 8.0), Vector3(6.0, 0.0, 12.0),
-		Vector3(-7.0, 0.0, -9.0), Vector3(11.0, 0.0, 7.0),
+		Vector3(7.0, 0.0, -14.0), Vector3(5.0, 0.0, 8.0),
+		Vector3(-4.0, 0.0, -12.0), Vector3(12.0, 0.0, -3.0),
+		Vector3(-10.0, 0.0, 8.0), Vector3(-6.0, 0.0, 12.0),
+		Vector3(-12.0, 0.0, -9.0), Vector3(14.0, 0.0, 7.0),
+		Vector3(-14.0, 0.0, -2.0), Vector3(10.0, 0.0, 13.0),
 	]
 	for pos in posiciones_arboles:
 		_crear_arbol(padre, pos)
@@ -272,19 +285,23 @@ func _crear_escena_prueba() -> void:
 	var mat_roca := StandardMaterial3D.new()
 	mat_roca.albedo_color = Color(0.5, 0.5, 0.48)
 	var posiciones_rocas := [
-		Vector3(-3.0, 0.2, 4.0), Vector3(4.0, 0.15, -3.0),
-		Vector3(-5.0, 0.25, -2.0), Vector3(8.0, 0.2, 2.0),
+		Vector3(-3.0, 0.0, 4.0), Vector3(4.0, 0.0, -3.0),
+		Vector3(-5.0, 0.0, -2.0), Vector3(11.0, 0.0, 2.0),
+		Vector3(-9.0, 0.0, -7.0), Vector3(3.0, 0.0, 10.0),
 	]
 	for pos in posiciones_rocas:
 		var roca := MeshInstance3D.new()
 		var roca_m := SphereMesh.new()
-		roca_m.radius = 0.3 + pos.y
+		roca_m.radius = 0.25 + randf() * 0.2
 		roca_m.height = roca_m.radius * 1.4
 		roca_m.material = mat_roca
 		roca.mesh = roca_m
 		roca.position = Vector3(pos.x, 0.15, pos.z)
 		roca.scale = Vector3(1.0, 0.6, 1.0)
 		padre.add_child(roca)
+
+	# --- Valla alrededor del mapa ---
+	_crear_valla(padre)
 
 	# --- Cámara ---
 	var camara := Camera3D.new()
@@ -349,3 +366,158 @@ func _crear_arbol(padre: Node, pos: Vector3) -> void:
 	arbol.add_child(copa)
 
 	padre.add_child(arbol)
+
+
+func _crear_casa(padre: Node, pos: Vector3) -> void:
+	var casa := Node3D.new()
+	casa.name = "Casa"
+	casa.position = pos
+
+	# Materiales
+	var mat_pared := StandardMaterial3D.new()
+	mat_pared.albedo_color = Color(0.85, 0.78, 0.65)
+	var mat_techo := StandardMaterial3D.new()
+	mat_techo.albedo_color = Color(0.6, 0.2, 0.15)
+	var mat_puerta := StandardMaterial3D.new()
+	mat_puerta.albedo_color = Color(0.35, 0.2, 0.1)
+	var mat_ventana := StandardMaterial3D.new()
+	mat_ventana.albedo_color = Color(0.5, 0.75, 0.9)
+	var mat_chimenea := StandardMaterial3D.new()
+	mat_chimenea.albedo_color = Color(0.45, 0.3, 0.25)
+
+	# --- Paredes (cuerpo principal) ---
+	var paredes := MeshInstance3D.new()
+	var paredes_m := BoxMesh.new()
+	paredes_m.size = Vector3(4.0, 2.5, 3.5)
+	paredes_m.material = mat_pared
+	paredes.mesh = paredes_m
+	paredes.position.y = 1.25
+	casa.add_child(paredes)
+
+	# Colisión de la casa (para no atravesarla)
+	var col_casa := StaticBody3D.new()
+	col_casa.position = pos
+	var col_shape := CollisionShape3D.new()
+	var box_shape := BoxShape3D.new()
+	box_shape.size = Vector3(4.0, 2.5, 3.5)
+	col_shape.shape = box_shape
+	col_shape.position.y = 1.25
+	col_casa.add_child(col_shape)
+	padre.add_child(col_casa)
+
+	# --- Techo (prisma triangular con un box rotado) ---
+	var techo := MeshInstance3D.new()
+	var techo_m := BoxMesh.new()
+	techo_m.size = Vector3(4.4, 0.15, 2.8)
+	techo_m.material = mat_techo
+	techo.mesh = techo_m
+	techo.position = Vector3(-0.7, 2.8, 0.0)
+	techo.rotation.z = deg_to_rad(25.0)
+	casa.add_child(techo)
+
+	var techo2 := MeshInstance3D.new()
+	techo2.mesh = techo_m
+	techo2.position = Vector3(0.7, 2.8, 0.0)
+	techo2.rotation.z = deg_to_rad(-25.0)
+	casa.add_child(techo2)
+
+	# Cumbrera (parte superior del techo)
+	var cumbrera := MeshInstance3D.new()
+	var cumbrera_m := BoxMesh.new()
+	cumbrera_m.size = Vector3(0.3, 0.15, 2.8)
+	cumbrera_m.material = mat_techo
+	cumbrera.mesh = cumbrera_m
+	cumbrera.position.y = 3.1
+	casa.add_child(cumbrera)
+
+	# --- Puerta ---
+	var puerta := MeshInstance3D.new()
+	var puerta_m := BoxMesh.new()
+	puerta_m.size = Vector3(0.7, 1.5, 0.05)
+	puerta_m.material = mat_puerta
+	puerta.mesh = puerta_m
+	puerta.position = Vector3(0.0, 0.75, 1.76)
+	casa.add_child(puerta)
+
+	# --- Ventanas ---
+	# Ventana izquierda
+	var ventana1 := MeshInstance3D.new()
+	var ventana_m := BoxMesh.new()
+	ventana_m.size = Vector3(0.6, 0.6, 0.05)
+	ventana_m.material = mat_ventana
+	ventana1.mesh = ventana_m
+	ventana1.position = Vector3(-1.2, 1.5, 1.76)
+	casa.add_child(ventana1)
+
+	# Ventana derecha
+	var ventana2 := MeshInstance3D.new()
+	ventana2.mesh = ventana_m
+	ventana2.position = Vector3(1.2, 1.5, 1.76)
+	casa.add_child(ventana2)
+
+	# Ventana lateral
+	var ventana3 := MeshInstance3D.new()
+	ventana3.mesh = ventana_m
+	ventana3.position = Vector3(2.01, 1.5, 0.0)
+	ventana3.rotation.y = deg_to_rad(90.0)
+	casa.add_child(ventana3)
+
+	# --- Chimenea ---
+	var chimenea := MeshInstance3D.new()
+	var chimenea_m := BoxMesh.new()
+	chimenea_m.size = Vector3(0.5, 1.2, 0.5)
+	chimenea_m.material = mat_chimenea
+	chimenea.mesh = chimenea_m
+	chimenea.position = Vector3(-1.2, 3.2, 0.0)
+	casa.add_child(chimenea)
+
+	padre.add_child(casa)
+
+
+func _crear_valla(padre: Node) -> void:
+	var mat_valla := StandardMaterial3D.new()
+	mat_valla.albedo_color = Color(0.5, 0.35, 0.18)
+	var limite := 18.0
+
+	# Crear postes y tablones en los 4 lados
+	for lado in 4:
+		for i in range(-18, 19, 2):
+			var poste := MeshInstance3D.new()
+			var poste_m := CylinderMesh.new()
+			poste_m.top_radius = 0.05
+			poste_m.bottom_radius = 0.06
+			poste_m.height = 0.8
+			poste_m.material = mat_valla
+			poste.mesh = poste_m
+
+			match lado:
+				0: poste.position = Vector3(float(i), 0.4, -limite)
+				1: poste.position = Vector3(float(i), 0.4, limite)
+				2: poste.position = Vector3(-limite, 0.4, float(i))
+				3: poste.position = Vector3(limite, 0.4, float(i))
+
+			padre.add_child(poste)
+
+	# Tablones horizontales (2 alturas, 4 lados)
+	for altura in [0.25, 0.55]:
+		for lado in 4:
+			var tablon := MeshInstance3D.new()
+			var tablon_m := BoxMesh.new()
+			tablon_m.material = mat_valla
+
+			match lado:
+				0:
+					tablon_m.size = Vector3(36.0, 0.08, 0.04)
+					tablon.position = Vector3(0.0, altura, -limite)
+				1:
+					tablon_m.size = Vector3(36.0, 0.08, 0.04)
+					tablon.position = Vector3(0.0, altura, limite)
+				2:
+					tablon_m.size = Vector3(0.04, 0.08, 36.0)
+					tablon.position = Vector3(-limite, altura, 0.0)
+				3:
+					tablon_m.size = Vector3(0.04, 0.08, 36.0)
+					tablon.position = Vector3(limite, altura, 0.0)
+
+			tablon.mesh = tablon_m
+			padre.add_child(tablon)
